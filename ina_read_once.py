@@ -14,7 +14,7 @@ def read_once():
         print("Power: ",ina.power()," mW ")
         print("Shunt Voltage: ",ina.shunt_Voltage()," mV ")
     except DeviceRangeError as e:
-        print e
+        print(e)
         
 if __name__ == "__main__":
     read_once()
