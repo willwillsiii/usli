@@ -129,7 +129,8 @@ def data_formatter(logger_q, ats_q):
                             'c_y(microTeslas)',
                             'c_z(microTeslas)',
                             'g_x(rad/s)', 'g_y(rad/s)', 'g_z(rad/s)',
-                            'a_x(G)', 'a_y(G)', 'a_z(G)\n']))
+                            'a_x(G)', 'a_y(G)', 'a_z(G),
+                            '\n']))
 
     if tel_mode:
         new_alt_data = [logger_q.get() for i in range(logger_q.qsize())]
