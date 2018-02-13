@@ -15,9 +15,12 @@ Nov 19 2017
 from multiprocessing import Process, Pipe, Queue
 from motors import StepperMotor
 from sense_hat import SenseHat
+from ina219 import INA219
+from ina219 import DeviceRangeError
 import numpy as np
 import serial
 import time
+
 
 
 def serial_altimeter(logger_q):
@@ -60,19 +63,21 @@ def data_formatter(logger_q, ats_q):
         2) ats_conn - Connection to the controlling process
     """
 
-    def append_data(log_file_path, out, start_time, alt_time, alt, sense):
+    def append_data(log_file_path, out, start_time, alt_time, alt, sense, shunt_ohm, max_expected_current):
         """Returns a numpy array with new data appended.
         Also writes data to a log file.
         
         Positional Arguments:
             2) out - the numpy array to be appended to
             3"""
+            
+        ina=INA219(shunt_ohm,max_expected_current,address=0x40)
+        ina.configure(ina.RANGE_16V)
         sense_time = time.time()
         h = sense.get_humidity() # relative
         p = sense.get_pressure() # Millibars
         t_h = sense.get_temperature_from_humidity() # C
-        t_p = sense.get_temperature_from_pressure() # C
-
+        t_p = sense.get_temperature_from_pressure() # 
         o = sense.get_orientation() # degrees
         o_p = o['pitch']
         o_r = o['roll']
@@ -92,6 +97,15 @@ def data_formatter(logger_q, ats_q):
         a_x = a['x']
         a_y = a['y']
         a_z = a['z']
+        
+        vlipo1 = ina.voltage();
+        ina=INA219(shunt_ohm,max_expected_current,address=0x41)
+        vlipo2 = ina.voltage();
+        ina=INA219(shunt_ohm,max_expected_current,address=0x44)
+        v9v = ina.voltage();
+        ina=INA219(shunt_ohm,max_expected_current,address=0x45)
+        vgps = ina.voltage();
+        
 
         new_out = np.array([[alt_time - start_time, alt,
                            sense_time - start_time,
@@ -99,13 +113,15 @@ def data_formatter(logger_q, ats_q):
                            o_p, o_r, o_y,
                            c_x, c_y, c_z,
                            g_x, g_y, g_z,
-                           a_x, a_y, a_z]])
+                           a_x, a_y, a_z, vlipo1, vlipo2, v9v, vgps]])
         with open(log_file_path, 'ab') as log:
             np.savetxt(log, new_out, delimiter='\t')
         return np.r_[out, new_out]
 
     tel_mode = logger_q.get()
     sense = SenseHat()
+    shunt_ohm=0.1
+    max_expected_current=0.4
     # initialize start time
     # and build a list of altimeter data (output from the queue)
     new_alt_data = [logger_q.get()]
@@ -129,7 +145,8 @@ def data_formatter(logger_q, ats_q):
                             'c_y(microTeslas)',
                             'c_z(microTeslas)',
                             'g_x(rad/s)', 'g_y(rad/s)', 'g_z(rad/s)',
-                            'a_x(G)', 'a_y(G)', 'a_z(G),
+                            'a_x(G)', 'a_y(G)', 'a_z(G)', 'LIPO1(V)',
+                            'LIPO2(V)', '9V(V)', 'GPS(V)'
                             '\n']))
 
     if tel_mode:
@@ -139,14 +156,14 @@ def data_formatter(logger_q, ats_q):
     # save partial lines to a buffer
     buffer_list = []
     while True:
-        out = np.empty((0, 19))
+        out = np.empty((0, 23))
         if len(new_alt_data) > 9:
             new_alt_data = new_alt_data[::2]
         for alt_data in new_alt_data:
             current_time = alt_data[0]
             alt = int(alt_data[1].decode().strip())
             out = append_data(log_file_path, out,
-                        start_time, current_time, alt, sense)
+                        start_time, current_time, alt, sense,shunt_ohm,max_expected_current)
         if out.size == 0:
             new_alt_data = [logger_q.get() for i in range(logger_q.qsize())]
             continue
