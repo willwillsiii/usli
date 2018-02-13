@@ -6,7 +6,7 @@ shunt_ohm=0.1
 def read_once():
 
     ina=INA219(shunt_ohm)
-    ina.configureina.RANGE_16V)
+    ina.configure(ina.RANGE_16V)
 
     try:
         print("Bus Voltage: ",ina.voltage()," V ")
