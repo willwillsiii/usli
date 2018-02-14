@@ -14,8 +14,8 @@ def read():
             print("Bus Voltage: ",ina.voltage()," V ")
             print("Bus Current: ",ina.current(), " mA ")
             print("Power: ",ina.power()," mW ")
-            print("Shunt Voltage: ",ina.shunt_Voltage()," mV \n")
-            time.sleep(0.1)
+            print("Shunt Voltage: ",ina.shunt_voltage()," mV \n")
+            time.sleep(1)
     except DeviceRangeError as e:
         print("\n,"e)
         
