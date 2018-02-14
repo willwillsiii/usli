@@ -7,7 +7,7 @@ shunt_ohm=0.1
 def read():
 
     ina=INA219(shunt_ohm)
-    ina.configureina.RANGE_16V)
+    ina.configure(ina.RANGE_16V)
 
     try:
         while True:
@@ -17,7 +17,7 @@ def read():
             print("Shunt Voltage: ",ina.shunt_Voltage()," mV \n")
             time.sleep(0.1)
     except DeviceRangeError as e:
-        print ("\n,"e)
+        print("\n,"e)
         
 if __name__ == "__main__":
     read()
