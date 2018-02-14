@@ -17,7 +17,7 @@ def read():
             print("Shunt Voltage: ",ina.shunt_voltage()," mV \n")
             time.sleep(1)
     except DeviceRangeError as e:
-        print("\n,"e)
+        print("\n", e)
         
 if __name__ == "__main__":
     read()
