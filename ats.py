@@ -98,13 +98,13 @@ def data_formatter(logger_q, ats_q):
         a_y = a['y']
         a_z = a['z']
         
-        vlipo1 = ina.voltage();
+        vlipo1 = ina.supply_voltage();
         ina=INA219(shunt_ohm,max_expected_current,address=0x41)
-        vlipo2 = ina.voltage();
+        vlipo2 = ina.supply_voltage();
         ina=INA219(shunt_ohm,max_expected_current,address=0x44)
-        v9v = ina.voltage();
+        v9v = ina.supply_voltage();
         ina=INA219(shunt_ohm,max_expected_current,address=0x45)
-        vgps = ina.voltage();
+        vgps = ina.supply_voltage();
         
 
         new_out = np.array([[alt_time - start_time, alt,
