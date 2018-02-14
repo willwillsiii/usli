@@ -12,7 +12,7 @@ def read_once():
         print("Bus Voltage: ",ina.voltage()," V ")
         print("Bus Current: ",ina.current(), " mA ")
         print("Power: ",ina.power()," mW ")
-        print("Shunt Voltage: ",ina.shunt_Voltage()," mV ")
+        print("Shunt Voltage: ",ina.shunt_voltage()," mV ")
     except DeviceRangeError as e:
         print(e)
         
